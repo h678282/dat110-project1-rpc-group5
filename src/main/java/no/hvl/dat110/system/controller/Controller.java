@@ -4,6 +4,10 @@ import no.hvl.dat110.TODO;
 import no.hvl.dat110.rpc.RPCClient;
 import no.hvl.dat110.rpc.RPCClientStopStub;
 
+/**
+ * Controlleren er klienten i IoT-systemet.
+ * Den henter temperatur fra sensor-serveren via RPC og sender den til display-serveren.
+ */
 public class Controller  {
 	
 	private static int N = 5;
@@ -24,17 +28,27 @@ public class Controller  {
 		// setup stop methods in the RPC middleware
 		RPCClientStopStub stopdisplay = new RPCClientStopStub(displayclient);
 		RPCClientStopStub stopsensor = new RPCClientStopStub(sensorclient);
-				
-		// TODO - START
-		
+
 		// create local display and sensor stub objects
+		display = new DisplayStub(displayclient);
+		sensor = new SensorStub(sensorclient);
+
 		// connect to sensor and display RPC servers - using the RPCClients
+		displayclient.connect();
+		sensorclient.connect();
+
 		// read value from sensor using RPC and write to display using RPC
-			
-		if (true)
-			throw new UnsupportedOperationException(TODO.method());
-		
-		// TODO - END
+		for (int i = 0; i < N; i++) {
+			int temp = sensor.read();
+
+			display.write(Integer.toString(temp));
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		
 		stopdisplay.stop();
 		stopsensor.stop();

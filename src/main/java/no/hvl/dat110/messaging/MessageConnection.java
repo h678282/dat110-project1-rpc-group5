@@ -8,7 +8,10 @@ import java.net.Socket;
 
 import no.hvl.dat110.TODO;
 
-
+/**
+ * Dette er selve koblingen eller broen som skal sende og motta meldinger over en socket
+ * Klassen inneholder DataOutputStream og DataInputStream
+ */
 public class MessageConnection {
 
 	private DataOutputStream outStream; // for writing bytes to the underlying TCP connection
@@ -32,35 +35,53 @@ public class MessageConnection {
 		}
 	}
 
+	/**
+	 * Bruker MessageUtils.encapsulate fra MessageUtils klassen til å sende 128 bytes melding på socket
+	 * @param message - melding vi vil sende
+	 */
 	public void send(Message message) {
 
 		byte[] data;
-		
-		// TODO - START
-		// encapsulate the data contained in the Message and write to the output stream
-		
-		if (true)
-			throw new UnsupportedOperationException(TODO.method());
-			
-		// TODO - END
 
+		// encapsulate the data contained in the Message and write to the output stream
+		// Vi gjør om "Message" til et 128-byte segment
+		data = MessageUtils.encapsulate(message);
+
+		try {
+			// vi skriver alle 128 bytes til tilkoblingen
+			outStream.write(data);
+
+			// flush gjør at bytene sendes ut med en gang og ikke blir liggende i en buffer
+			outStream.flush();
+
+		} catch (IOException ex) {
+			System.out.println("MessageConnection.send: " + ex.getMessage());
+			ex.printStackTrace();
+		}
 	}
 
+	/**
+	 * Leser segment på 128 byte og bruker MessageUtils.decapsulate() til å returnere meldingen
+	 * @return - selve meldingen
+	 */
 	public Message receive() {
 
 		Message message = null;
 		byte[] data;
-		
-		// TODO - START
+
 		// read a segment from the input stream and decapsulate data into a Message
-		
-		if (true)
-			throw new UnsupportedOperationException(TODO.method());
-		
-		// TODO - END
-		
+		try {
+			// vi sørger for at vi alltid får et helt segment (128 bytes)
+			data = new byte[MessageUtils.SEGMENTSIZE];
+
+			inStream.readFully(data);
+			message = MessageUtils.decapsulate(data);
+
+		} catch (IOException ex) {
+			System.out.println("MessageConnection.receive: " + ex.getMessage());
+			ex.printStackTrace();
+		}
 		return message;
-		
 	}
 
 	// close the connection by closing streams and the underlying socket	

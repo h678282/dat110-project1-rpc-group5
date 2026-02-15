@@ -5,6 +5,9 @@ import java.net.Socket;
 
 import no.hvl.dat110.TODO;
 
+/**
+ * Lager en TCP-socket til serveren, og returnerer MessageConnection
+ */
 public class MessagingClient {
 
 	// name/IP address of the messaging server
@@ -19,21 +22,29 @@ public class MessagingClient {
 	}
 	
 	// setup of a messaging connection to a messaging server
+
+	/**
+	 * Skal opprette en TCP-forbindelse til serveren, lage en MessageConnection rundt socket og returnere den.
+	 * @return - selve forbindelsen
+	 */
 	public MessageConnection connect () {
 
 		// client-side socket for underlying TCP connection to messaging server
 		Socket clientSocket;
 
 		MessageConnection connection = null;
-		
-		// TODO - START
+
 		// connect to messaging server using a TCP socket
 		// create and return a corresponding messaging connection
-		
-		if (true)
-			throw new UnsupportedOperationException(TODO.method());
-		
-		// TODO - END
+		try {
+			clientSocket = new Socket(server, port);
+			connection = new MessageConnection(clientSocket);
+
+		} catch (Exception e) {
+			System.out.println("MessagingClient.connect: " + e.getMessage());
+			e.printStackTrace();
+		}
+
 		return connection;
 	}
 }

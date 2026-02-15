@@ -7,6 +7,11 @@ import no.hvl.dat110.messaging.MessageConnection;
 import no.hvl.dat110.messaging.Message;
 import no.hvl.dat110.messaging.MessagingServer;
 
+/**
+ * Klassen mottar en RPC-forespørsel fra klienten og finner riktig metode basert på rpcid.
+ * Deretter kjører den metoden på serveren og sender returverdien tilbake til klienten.
+ */
+
 public class RPCServer {
 
 	private MessagingServer msgserver;
@@ -40,20 +45,32 @@ public class RPCServer {
 	    
 		   byte rpcid = 0;
 		   Message requestmsg, replymsg;
-		   
-		   // TODO - START
+
 		   // - receive a Message containing an RPC request
+			requestmsg = connection.receive();
+
 		   // - extract the identifier for the RPC method to be invoked from the RPC request
+			byte[] rpcmsg = requestmsg.getData();
+			rpcid = rpcmsg[0];
+
 		   // - extract the method's parameter by decapsulating using the RPCUtils
+			byte[] param = RPCUtils.decapsulate(rpcmsg);
+
 		   // - lookup the method to be invoked
+			RPCRemoteImpl impl = services.get(rpcid);
+			if (impl == null) {
+				throw new RuntimeException("Unknown RPC id: " + rpcid);
+			}
+
 		   // - invoke the method and pass the param
-		   // - encapsulate return value 
+			byte[] returnval = impl.invoke(param);
+
+		   // - encapsulate return value
+			byte[] replyrpc = RPCUtils.encapsulate(rpcid, returnval);
+
 		   // - send back the message containing the RPC reply
-			
-		   if (true)
-				throw new UnsupportedOperationException(TODO.method());
-		   
-		   // TODO - END
+			replymsg = new Message(replyrpc);
+			connection.send(replymsg);
 
 			// stop the server if it was stop methods that was called
 		   if (rpcid == RPCCommon.RPIDSTOP) {
